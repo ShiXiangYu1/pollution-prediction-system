@@ -6,7 +6,7 @@ services:
   # 主应用服务
   app:
     # 离线环境使用预构建镜像
-    image: 294802186/pollution-prediction:v1.0
+    image: 294802186/pollution-prediction:v1.1
     # 开发环境可使用本地构建
     # build:
     #   context: .
@@ -163,7 +163,7 @@ volumes:
 networks:
   app_network:
     driver: bridge
-    # 可选：指定子网，避免与公司内网冲突
-    # ipam:
-    #   config:
-    #     - subnet: 172.28.0.0/16 
+    # 配置一个固定的子网，避免与公司内网冲突
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16 

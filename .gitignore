@@ -7,6 +7,7 @@ __pycache__/
 # 日志文件
 *.log
 logs/*.log
+logs/*
 
 # 临时文件
 *.tmp
@@ -42,12 +43,35 @@ dist/
 # 临时目录
 data/temp/
 data/uploads/
+data/results/
 
 # 测试结果
 测试结果/功能测试/*.png
 测试结果/性能测试/*.png
 测试结果/用户体验测试/*.png
+测试结果/**/*.log
+测试结果/**/*.json
 
 # 系统特定文件
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# 大型数据文件和模型
+*.csv
+*.parquet
+*.pkl
+*.joblib
+*.h5
+models/*.pth
+models/*.onnx
+models/*.pt
+
+# Docker临时文件
+.docker/
+
+# 其他无需版本控制的文件
+*.bak
+*.old
+*~
+.*.swp
+._* 

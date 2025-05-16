@@ -18,7 +18,7 @@
 - **前端**：HTML/CSS/JavaScript，结合Bootstrap框架和Chart.js可视化库
 - **后端**：Python FastAPI框架，提供RESTful API接口
 - **模型**：基于PyTorch的深度学习模型，用于污染物排放预测
-- **部署**：基于Docker容器化部署，支持离线环境运行
+- **部署**：基于Docker容器化部署，支持快速部署和扩展
 
 ## 开发进度
 
@@ -150,28 +150,11 @@ docker pull ${DOCKERHUB_USERNAME}/pollution-prediction:v1.0
    docker-compose up -d
    ```
 
-### 方天公司离线环境部署说明
+## 项目优化记录
 
-对于在方天公司离线环境（局域网）内的部署，请：
+### 2024-05-08 优化
 
-1. 从公网环境拉取最新镜像：
-   ```bash
-   docker pull ${DOCKERHUB_USERNAME}/pollution-prediction:latest
-   ```
-
-2. 保存镜像为文件：
-   ```bash
-   docker save ${DOCKERHUB_USERNAME}/pollution-prediction:latest > pollution-prediction.tar
-   ```
-
-3. 将镜像文件和`docker-compose.yml`文件复制到离线环境
-
-4. 在离线环境中加载镜像：
-   ```bash
-   docker load < pollution-prediction.tar
-   ```
-
-5. 启动服务：
-   ```bash
-   docker-compose up -d
-   ``` 
+- 清理了项目中的冗余文件和目录
+- 删除了空的`__pycache__`目录
+- 优化了测试目录结构，删除了重复测试日志
+- 整理了部署脚本，确保Windows和Linux部署脚本保持一致性 
