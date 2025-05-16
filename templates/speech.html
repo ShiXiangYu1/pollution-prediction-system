@@ -1,0 +1,886 @@
+{% extends "base.html" %}
+
+{% block title %}语音识别 - 电厂污染物排放预测系统{% endblock %}
+
+{% block nav_speech %}active{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">语音识别查询</h2>
+        </div>
+    </div>
+</div>
+
+<!-- 语音输入区域 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">语音输入</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-4">
+                    <div class="voice-control mb-4" id="voice-control">
+                        <button id="start-record-btn" class="btn btn-lg btn-primary rounded-circle p-4">
+                            <i class="fas fa-microphone fa-2x"></i>
+                        </button>
+                        <button id="stop-record-btn" class="btn btn-lg btn-danger rounded-circle p-4" style="display: none;">
+                            <i class="fas fa-stop fa-2x"></i>
+                        </button>
+                    </div>
+                    <div id="recording-status" class="mb-3">点击麦克风按钮开始录音</div>
+                    <div id="recording-time" class="fs-4 mb-3" style="display: none;">00:00</div>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="audio-visualizer mb-3" id="audio-visualizer" style="display: none;">
+                                <canvas id="visualizer-canvas" height="60"></canvas>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="speech-text" class="form-label">识别结果</label>
+                                <textarea id="speech-text" class="form-control" rows="3" placeholder="语音识别结果将显示在这里..." readonly></textarea>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-3">
+                                <button id="clear-text-btn" class="btn btn-outline-secondary">
+                                    <i class="fas fa-eraser me-1"></i> 清空结果
+                                </button>
+                                <button id="submit-speech-btn" class="btn btn-primary" disabled>
+                                    <i class="fas fa-paper-plane me-1"></i> 提交查询
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 查询结果区域 -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">查询结果</h5>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="copy-result-btn" disabled>
+                        <i class="fas fa-clipboard me-1"></i> 复制结果
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-success" id="export-result-btn" disabled>
+                        <i class="fas fa-download me-1"></i> 导出数据
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="result-placeholder" class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-microphone-alt fa-3x text-muted"></i>
+                    </div>
+                    <h5 class="text-muted">暂无查询结果</h5>
+                    <p class="text-muted">请使用语音输入并提交查询</p>
+                </div>
+                
+                <div id="query-result" style="display: none;">
+                    <!-- 结果内容 - 由JavaScript填充 -->
+                    <div class="mb-4" id="answer-text"></div>
+                    
+                    <!-- 图表结果 -->
+                    <div class="chart-container" id="chart-result" style="position: relative; height: 300px; display: none;">
+                        <canvas id="result-chart"></canvas>
+                    </div>
+                    
+                    <!-- 表格结果 -->
+                    <div class="table-responsive" id="table-result" style="display: none;">
+                        <table class="table table-striped table-bordered">
+                            <thead id="result-table-head"></thead>
+                            <tbody id="result-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 语音识别历史 -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">语音查询历史</h5>
+                <button type="button" class="btn btn-sm btn-outline-danger" id="clear-history-btn">
+                    <i class="fas fa-trash-alt me-1"></i> 清空历史
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>识别文本</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <tr id="no-history-record">
+                                <td colspan="3" class="text-center">暂无语音查询历史</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 语音识别说明 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">语音识别使用说明</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">支持的语音查询类型</h6>
+                        <ul class="list-group mb-4">
+                            <li class="list-group-item">
+                                <i class="fas fa-chart-line me-2 text-primary"></i> 排放数据查询
+                                <small class="d-block text-muted">"查询1号机组昨天的二氧化硫排放量"</small>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-exclamation-triangle me-2 text-warning"></i> 超标情况查询
+                                <small class="d-block text-muted">"近一周有哪些超标记录"</small>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-chart-bar me-2 text-success"></i> 对比分析查询
+                                <small class="d-block text-muted">"比较各机组的氮氧化物排放情况"</small>
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-chart-area me-2 text-info"></i> 趋势分析查询
+                                <small class="d-block text-muted">"分析近一个月烟尘排放趋势"</small>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="mb-3">使用提示</h6>
+                        <ol class="list-group list-group-numbered mb-4">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div>保持安静的环境</div>
+                                    <small class="text-muted">减少背景噪音可提高识别准确率</small>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div>语速适中，发音清晰</div>
+                                    <small class="text-muted">避免过快或含糊不清的语音</small>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div>使用具体的时间、机组号等信息</div>
+                                    <small class="text-muted">提高查询的精确度</small>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div>检查识别结果并修改</div>
+                                    <small class="text-muted">提交前可编辑识别文本</small>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 全局变量
+let mediaRecorder = null;
+let audioChunks = [];
+let audioContext = null;
+let analyser = null;
+let microphone = null;
+let canvasContext = null;
+let recorder = null;
+let recordingStartTime = 0;
+let recordingTimer = null;
+let isRecording = false;
+let speechHistory = [];
+let resultChart = null;
+let currentResult = null;
+
+// 页面加载完成后执行
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化可视化器画布
+    canvasContext = document.getElementById('visualizer-canvas').getContext('2d');
+    
+    // 绑定录音按钮事件
+    document.getElementById('start-record-btn').addEventListener('click', startRecording);
+    document.getElementById('stop-record-btn').addEventListener('click', stopRecording);
+    
+    // 绑定清空按钮事件
+    document.getElementById('clear-text-btn').addEventListener('click', function() {
+        document.getElementById('speech-text').value = '';
+        document.getElementById('submit-speech-btn').disabled = true;
+    });
+    
+    // 绑定提交按钮事件
+    document.getElementById('submit-speech-btn').addEventListener('click', submitSpeechQuery);
+    
+    // 绑定复制结果按钮事件
+    document.getElementById('copy-result-btn').addEventListener('click', function() {
+        if (!currentResult) return;
+        
+        const resultText = currentResult.answer;
+        copyToClipboard(resultText);
+    });
+    
+    // 绑定导出结果按钮事件
+    document.getElementById('export-result-btn').addEventListener('click', function() {
+        if (!currentResult) return;
+        
+        // 导出数据逻辑
+        exportResultData();
+    });
+    
+    // 绑定清空历史按钮事件
+    document.getElementById('clear-history-btn').addEventListener('click', clearSpeechHistory);
+    
+    // 加载语音历史记录
+    loadSpeechHistory();
+    
+    // 检查麦克风权限
+    checkMicrophonePermission();
+});
+
+// 检查麦克风权限
+function checkMicrophonePermission() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showMicrophoneError('您的浏览器不支持语音录制功能');
+        return;
+    }
+    
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+            // 权限已获取，释放流
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+        })
+        .catch(function(err) {
+            console.error('麦克风访问错误:', err);
+            showMicrophoneError('无法访问麦克风，请检查权限设置');
+        });
+}
+
+// 显示麦克风错误
+function showMicrophoneError(message) {
+    const voiceControl = document.getElementById('voice-control');
+    const recordingStatus = document.getElementById('recording-status');
+    
+    voiceControl.innerHTML = '<i class="fas fa-microphone-slash fa-4x text-danger"></i>';
+    recordingStatus.innerHTML = `<span class="text-danger">${message}</span>`;
+    recordingStatus.classList.add('text-danger');
+    
+    document.getElementById('start-record-btn').disabled = true;
+}
+
+// 开始录音
+function startRecording() {
+    // 检查浏览器支持
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showAlert('您的浏览器不支持语音录制功能', 'danger');
+        return;
+    }
+    
+    // 重置录音状态
+    isRecording = true;
+    audioChunks = [];
+    
+    // 更新UI状态
+    document.getElementById('start-record-btn').style.display = 'none';
+    document.getElementById('stop-record-btn').style.display = 'inline-block';
+    document.getElementById('recording-status').innerHTML = '<span class="text-danger">正在录音...</span>';
+    document.getElementById('recording-time').style.display = 'block';
+    document.getElementById('audio-visualizer').style.display = 'block';
+    
+    // 开始计时
+    recordingStartTime = Date.now();
+    updateRecordingTime();
+    recordingTimer = setInterval(updateRecordingTime, 1000);
+    
+    // 获取麦克风访问权限
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            // 初始化可视化器
+            initAudioVisualizer(stream);
+            
+            // 创建MediaRecorder
+            mediaRecorder = new MediaRecorder(stream);
+            
+            // 监听录音数据
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+            
+            // 监听录音结束
+            mediaRecorder.onstop = () => {
+                // 释放媒体流
+                if (microphone) {
+                    microphone.disconnect();
+                    microphone = null;
+                }
+                
+                if (audioContext) {
+                    audioContext.close();
+                    audioContext = null;
+                }
+                
+                // 创建音频文件
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                
+                // 将录音发送到语音识别服务
+                recognizeSpeech(audioBlob);
+            };
+            
+            // 开始录音
+            mediaRecorder.start();
+        })
+        .catch(error => {
+            console.error('麦克风访问错误:', error);
+            showAlert('无法访问麦克风，请检查权限设置', 'danger');
+            resetRecordingUI();
+        });
+}
+
+// 初始化音频可视化器
+function initAudioVisualizer(stream) {
+    // 创建音频上下文
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // 创建分析器
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    
+    // 连接麦克风输入
+    microphone = audioContext.createMediaStreamSource(stream);
+    microphone.connect(analyser);
+    
+    // 获取频谱数据
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    
+    // 绘制可视化效果
+    const canvas = document.getElementById('visualizer-canvas');
+    const canvasCtx = canvas.getContext('2d');
+    const WIDTH = canvas.width;
+    const HEIGHT = canvas.height;
+    
+    function draw() {
+        if (!isRecording) return;
+        
+        // 请求下一帧动画
+        requestAnimationFrame(draw);
+        
+        // 获取频谱数据
+        analyser.getByteFrequencyData(dataArray);
+        
+        // 清空画布
+        canvasCtx.fillStyle = 'rgb(245, 247, 251)';
+        canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+        
+        // 计算条形宽度
+        const barWidth = (WIDTH / bufferLength) * 2.5;
+        let barHeight;
+        let x = 0;
+        
+        // 绘制频谱条形图
+        for (let i = 0; i < bufferLength; i++) {
+            barHeight = dataArray[i] / 255 * HEIGHT;
+            
+            // 根据频率设置渐变颜色
+            const r = 44 + (211 * (i / bufferLength));
+            const g = 106 + (149 * (i / bufferLength));
+            const b = 179 - (46 * (i / bufferLength));
+            
+            canvasCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            canvasCtx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+            
+            x += barWidth + 1;
+        }
+    }
+    
+    draw();
+}
+
+// 更新录音时间
+function updateRecordingTime() {
+    const elapsedTime = Math.floor((Date.now() - recordingStartTime) / 1000);
+    const minutes = Math.floor(elapsedTime / 60).toString().padStart(2, '0');
+    const seconds = (elapsedTime % 60).toString().padStart(2, '0');
+    document.getElementById('recording-time').textContent = `${minutes}:${seconds}`;
+    
+    // 限制录音时间（最长3分钟）
+    if (elapsedTime >= 180) {
+        stopRecording();
+    }
+}
+
+// 停止录音
+function stopRecording() {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+        return;
+    }
+    
+    // 停止录音
+    mediaRecorder.stop();
+    isRecording = false;
+    
+    // 停止计时
+    clearInterval(recordingTimer);
+    
+    // 更新UI
+    document.getElementById('recording-status').textContent = '处理语音中...';
+    document.getElementById('stop-record-btn').style.display = 'none';
+    
+    // 隐藏可视化器
+    document.getElementById('audio-visualizer').style.display = 'none';
+}
+
+// 重置录音UI
+function resetRecordingUI() {
+    isRecording = false;
+    clearInterval(recordingTimer);
+    
+    document.getElementById('start-record-btn').style.display = 'inline-block';
+    document.getElementById('stop-record-btn').style.display = 'none';
+    document.getElementById('recording-status').textContent = '点击麦克风按钮开始录音';
+    document.getElementById('recording-time').style.display = 'none';
+    document.getElementById('audio-visualizer').style.display = 'none';
+}
+
+// 语音识别
+function recognizeSpeech(audioBlob) {
+    // 创建FormData
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'recording.wav');
+    
+    // 更新状态
+    document.getElementById('recording-status').textContent = '正在识别语音...';
+    
+    // 发送到服务器进行识别
+    axios.post('/speech-to-text', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+    .then(response => {
+        // 获取识别结果
+        const recognizedText = response.data.text;
+        
+        // 更新UI
+        document.getElementById('speech-text').value = recognizedText;
+        document.getElementById('recording-status').textContent = '语音识别完成';
+        document.getElementById('submit-speech-btn').disabled = !recognizedText.trim();
+        
+        // 重置录音UI
+        document.getElementById('start-record-btn').style.display = 'inline-block';
+    })
+    .catch(error => {
+        console.error('语音识别错误:', error);
+        document.getElementById('recording-status').textContent = '语音识别失败';
+        showAlert('语音识别失败，请重试', 'danger');
+        
+        // 重置录音UI
+        document.getElementById('start-record-btn').style.display = 'inline-block';
+    });
+}
+
+// 提交语音查询
+function submitSpeechQuery() {
+    const queryText = document.getElementById('speech-text').value.trim();
+    
+    if (!queryText) {
+        showAlert('请先进行语音识别', 'warning');
+        return;
+    }
+    
+    // 显示加载状态
+    const submitBtn = document.getElementById('submit-speech-btn');
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>查询中...';
+    
+    // 发送查询请求
+    axios.post('/api/nlp_query', {
+        query: queryText,
+        mode: 'speech'
+    })
+    .then(function(response) {
+        // 处理响应
+        updateQueryResult(response.data);
+        
+        // 添加到历史记录
+        addToHistory(queryText, response.data);
+        
+        // 恢复按钮状态
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    })
+    .catch(function(error) {
+        // 处理错误
+        handleApiError(error);
+        
+        // 恢复按钮状态
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    });
+}
+
+// 更新查询结果显示
+function updateQueryResult(result) {
+    // 保存当前结果
+    currentResult = result;
+    
+    // 隐藏占位符，显示结果区域
+    document.getElementById('result-placeholder').style.display = 'none';
+    document.getElementById('query-result').style.display = 'block';
+    
+    // 更新答案文本
+    const answerElement = document.getElementById('answer-text');
+    answerElement.innerHTML = `<p class="lead">${result.answer}</p>`;
+    
+    // 启用复制和导出按钮
+    document.getElementById('copy-result-btn').disabled = false;
+    document.getElementById('export-result-btn').disabled = false;
+    
+    // 处理图表结果
+    const chartContainer = document.getElementById('chart-result');
+    if (result.chart_data) {
+        chartContainer.style.display = 'block';
+        updateResultChart(result.chart_data);
+    } else {
+        chartContainer.style.display = 'none';
+    }
+    
+    // 处理表格结果
+    const tableContainer = document.getElementById('table-result');
+    if (result.table_data) {
+        tableContainer.style.display = 'block';
+        updateResultTable(result.table_data);
+    } else {
+        tableContainer.style.display = 'none';
+    }
+}
+
+// 更新结果图表
+function updateResultChart(chartData) {
+    const ctx = document.getElementById('result-chart').getContext('2d');
+    
+    // 准备数据集
+    const datasets = chartData.datasets.map((dataset, index) => {
+        return {
+            label: dataset.label,
+            data: dataset.data,
+            backgroundColor: dataset.color || dataset.colors || getRandomColor(index),
+            borderColor: dataset.color || getRandomColor(index),
+            borderWidth: 1,
+            fill: chartData.type === 'area',
+            tension: 0.4
+        };
+    });
+    
+    // 清除旧图表
+    if (resultChart) {
+        resultChart.destroy();
+    }
+    
+    // 创建新图表
+    resultChart = new Chart(ctx, {
+        type: chartData.type === 'area' ? 'line' : chartData.type,
+        data: {
+            labels: chartData.labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: !!chartData.title,
+                    text: chartData.title || ''
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: !!chartData.xLabel,
+                        text: chartData.xLabel || ''
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    title: {
+                        display: !!chartData.yLabel,
+                        text: chartData.yLabel || ''
+                    },
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 更新结果表格
+function updateResultTable(tableData) {
+    const tableHead = document.getElementById('result-table-head');
+    const tableBody = document.getElementById('result-table-body');
+    
+    // 清空表格
+    tableHead.innerHTML = '';
+    tableBody.innerHTML = '';
+    
+    // 添加表头
+    const headerRow = document.createElement('tr');
+    tableData.headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+    });
+    tableHead.appendChild(headerRow);
+    
+    // 添加数据行
+    tableData.rows.forEach(rowData => {
+        const row = document.createElement('tr');
+        rowData.forEach(cell => {
+            const td = document.createElement('td');
+            td.innerHTML = cell;
+            row.appendChild(td);
+        });
+        tableBody.appendChild(row);
+    });
+}
+
+// 添加到历史记录
+function addToHistory(queryText, result) {
+    const timestamp = new Date().toISOString();
+    
+    // 添加到历史记录数组
+    speechHistory.unshift({
+        timestamp: timestamp,
+        query: queryText,
+        result: result
+    });
+    
+    // 限制历史记录数量
+    if (speechHistory.length > 20) {
+        speechHistory.pop();
+    }
+    
+    // 保存到本地存储
+    localStorage.setItem('speech_query_history', JSON.stringify(speechHistory));
+    
+    // 更新历史记录表格
+    updateHistoryTable();
+}
+
+// 加载历史记录
+function loadSpeechHistory() {
+    const storedHistory = localStorage.getItem('speech_query_history');
+    
+    if (storedHistory) {
+        try {
+            speechHistory = JSON.parse(storedHistory);
+            updateHistoryTable();
+        } catch (e) {
+            console.error('加载语音历史记录失败:', e);
+            speechHistory = [];
+        }
+    }
+}
+
+// 清空历史记录
+function clearSpeechHistory() {
+    speechHistory = [];
+    localStorage.removeItem('speech_query_history');
+    updateHistoryTable();
+    showAlert('历史记录已清空', 'success');
+}
+
+// 更新历史记录表格
+function updateHistoryTable() {
+    const tbody = document.getElementById('history-tbody');
+    const noHistoryRow = document.getElementById('no-history-record');
+    
+    if (speechHistory.length === 0) {
+        if (!noHistoryRow) {
+            tbody.innerHTML = '<tr id="no-history-record"><td colspan="3" class="text-center">暂无语音查询历史</td></tr>';
+        }
+        return;
+    }
+    
+    // 清空表格
+    tbody.innerHTML = '';
+    
+    // 添加历史记录
+    speechHistory.forEach((item, index) => {
+        const row = document.createElement('tr');
+        
+        const timeCell = document.createElement('td');
+        timeCell.textContent = formatDateTime(item.timestamp);
+        
+        const queryCell = document.createElement('td');
+        queryCell.textContent = item.query;
+        
+        const actionCell = document.createElement('td');
+        actionCell.innerHTML = `
+            <button type="button" class="btn btn-sm btn-outline-primary me-1 reuse-query-btn" data-index="${index}">
+                <i class="fas fa-redo-alt"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger delete-query-btn" data-index="${index}">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        row.appendChild(timeCell);
+        row.appendChild(queryCell);
+        row.appendChild(actionCell);
+        
+        tbody.appendChild(row);
+    });
+    
+    // 绑定重用查询按钮事件
+    document.querySelectorAll('.reuse-query-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            const item = speechHistory[index];
+            
+            if (item) {
+                document.getElementById('speech-text').value = item.query;
+                document.getElementById('submit-speech-btn').disabled = false;
+                updateQueryResult(item.result);
+            }
+        });
+    });
+    
+    // 绑定删除查询按钮事件
+    document.querySelectorAll('.delete-query-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            
+            speechHistory.splice(index, 1);
+            localStorage.setItem('speech_query_history', JSON.stringify(speechHistory));
+            updateHistoryTable();
+        });
+    });
+}
+
+// 导出结果数据
+function exportResultData() {
+    if (!currentResult) return;
+    
+    let csvContent = '';
+    let filename = '语音查询结果_' + new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-') + '.csv';
+    
+    if (currentResult.table_data) {
+        // 导出表格数据
+        csvContent = tableToCSV(currentResult.table_data);
+    } else if (currentResult.chart_data) {
+        // 导出图表数据
+        csvContent = chartToCSV(currentResult.chart_data);
+    } else {
+        // 仅导出文本
+        csvContent = '查询结果\n' + currentResult.answer;
+    }
+    
+    // 创建下载链接
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// 表格数据转CSV
+function tableToCSV(tableData) {
+    let csv = '';
+    
+    // 添加表头
+    csv += tableData.headers.join(',') + '\n';
+    
+    // 添加数据行
+    tableData.rows.forEach(row => {
+        csv += row.map(cell => {
+            // 处理包含逗号的内容
+            if (typeof cell === 'string' && cell.includes(',')) {
+                return `"${cell}"`;
+            }
+            return cell;
+        }).join(',') + '\n';
+    });
+    
+    return csv;
+}
+
+// 图表数据转CSV
+function chartToCSV(chartData) {
+    let csv = '';
+    
+    // 添加标题行
+    csv += 'Labels,' + chartData.datasets.map(ds => ds.label).join(',') + '\n';
+    
+    // 添加数据行
+    chartData.labels.forEach((label, index) => {
+        csv += label + ',';
+        csv += chartData.datasets.map(ds => ds.data[index]).join(',');
+        csv += '\n';
+    });
+    
+    return csv;
+}
+
+// 获取随机颜色
+function getRandomColor(index) {
+    const colors = [
+        'rgba(255, 99, 132, 0.7)',
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(255, 206, 86, 0.7)',
+        'rgba(75, 192, 192, 0.7)',
+        'rgba(153, 102, 255, 0.7)',
+        'rgba(255, 159, 64, 0.7)',
+        'rgba(199, 199, 199, 0.7)',
+        'rgba(83, 102, 255, 0.7)',
+        'rgba(40, 159, 110, 0.7)',
+        'rgba(205, 109, 114, 0.7)'
+    ];
+    
+    return colors[index % colors.length];
+}
+</script>
+{% endblock %} 

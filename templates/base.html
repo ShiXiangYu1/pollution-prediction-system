@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}电厂污染物排放预测与发电数据中心智慧看板{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/static/css/styles.css" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-industry me-2"></i>电厂智慧看板
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% block nav_home %}{% endblock %}" href="/">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="/dashboard">数据看板</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% block nav_prediction %}{% endblock %}" href="/prediction">排放预测</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% block nav_nlp %}{% endblock %}" href="/nlp">自然语言查询</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% block nav_speech %}{% endblock %}" href="/speech">语音识别</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="container py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2025 电厂污染物排放预测与发电数据中心智慧看板</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-decoration-none me-3" data-bs-toggle="modal" data-bs-target="#helpModal">使用指南</a>
+                    <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#supportModal">技术支持</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 帮助模态框 -->
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">系统使用指南</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h5 class="mb-3">系统功能简介</h5>
+                        <p>电厂污染物排放预测系统是一套集成了数据监测、数据分析、排放预测和智能查询的综合平台，可以帮助您实时监控和预测电厂的污染物排放情况。</p>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">主要功能模块</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <i class="fas fa-tachometer-alt me-2 text-primary"></i> 数据看板：实时监控污染物排放数据
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-chart-line me-2 text-success"></i> 排放预测：使用深度学习模型预测未来排放趋势
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-comment me-2 text-info"></i> 自然语言查询：使用自然语言进行数据查询
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-microphone me-2 text-danger"></i> 语音识别：使用语音进行自然语言查询
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-3">快速入门</h5>
+                            <ol>
+                                <li class="mb-2">从首页了解系统整体功能和最新数据</li>
+                                <li class="mb-2">在数据看板中查看详细的排放数据和趋势</li>
+                                <li class="mb-2">使用排放预测功能，预测未来排放情况</li>
+                                <li class="mb-2">尝试使用自然语言或语音进行数据查询</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">了解了</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 技术支持模态框 -->
+    <div class="modal fade" id="supportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">技术支持</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>如果您在使用过程中遇到任何问题，请通过以下方式联系我们的技术支持团队：</p>
+                    
+                    <div class="mb-3">
+                        <h6>联系方式</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-envelope me-2"></i> 邮箱：support@powerplant-tech.com
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-phone me-2"></i> 电话：400-123-4567
+                            </li>
+                            <li>
+                                <i class="fas fa-comment me-2"></i> 在线客服：工作日 9:00-18:00
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h6>常见问题</h6>
+                        <div class="accordion" id="faqAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse1" aria-expanded="false" aria-controls="faqCollapse1">
+                                        如何更新系统？
+                                    </button>
+                                </h2>
+                                <div id="faqCollapse1" class="accordion-collapse collapse" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        系统会自动检查并应用更新，无需手动操作。如需手动更新，请联系技术支持。
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse2" aria-expanded="false" aria-controls="faqCollapse2">
+                                        如何导出数据报表？
+                                    </button>
+                                </h2>
+                                <div id="faqCollapse2" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        在数据看板页面，点击右上角的导出按钮，选择导出格式（Excel、PDF、CSV）即可下载报表。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript库 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <!-- 全局配置和工具函数 -->
+    <script src="/static/js/global.js"></script>
+    
+    <!-- 全局设置 -->
+    <script>
+        // API基础URL
+        const API_BASE_URL = '';
+        
+        // 设置Axios默认配置
+        axios.defaults.baseURL = API_BASE_URL;
+        axios.defaults.headers.common['Content-Type'] = 'application/json';
+        
+        // 设置Moment.js为中文
+        moment.locale('zh-cn');
+        
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为导航栏添加滚动效果
+            const navbar = document.querySelector('.navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('navbar-scrolled');
+                } else {
+                    navbar.classList.remove('navbar-scrolled');
+                }
+            });
+            
+            // 初始化导航栏状态
+            if (window.scrollY > 50) {
+                navbar.classList.add('navbar-scrolled');
+            }
+            
+            // 修正页面内容与导航栏重叠问题
+            document.body.style.paddingTop = (navbar.offsetHeight + 20) + 'px';
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

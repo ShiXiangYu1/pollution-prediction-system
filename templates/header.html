@@ -1,0 +1,239 @@
+<!-- 响应式导航栏头部模板 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>{% block title %}电厂污染物排放预测系统{% endblock %}</title>
+    
+    <!-- CSS 引入 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- 字体引入 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+    
+    <!-- JavaScript 库引入 -->
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="header-area">
+        <div class="navbar-container">
+            <nav class="navbar">
+                <div class="navbar-brand">
+                    <a href="{{ url_for('index') }}" class="logo">
+                        <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0zm0 36c-8.837 0-16-7.163-16-16S11.163 4 20 4s16 7.163 16 16-7.163 16-16 16z" fill="#2c7be5"/>
+                            <path d="M28 14a2 2 0 012 2v12a2 2 0 01-2 2H12a2 2 0 01-2-2V16a2 2 0 012-2h4v-4h8v4h4z" fill="#2c7be5"/>
+                            <path d="M20 18a4 4 0 100 8 4 4 0 000-8z" fill="#ffffff"/>
+                        </svg>
+                        <span class="logo-text">电厂污染物排放预测系统</span>
+                    </a>
+                    <button class="mobile-menu-toggle" aria-label="菜单" type="button">
+                        <span class="navbar-toggler-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+                
+                <div class="navbar-collapse">
+                    <ul class="navbar-nav">
+                        <li class="nav-item {% if request.path == url_for('index') %}active{% endif %}">
+                            <a class="nav-link" href="{{ url_for('index') }}">
+                                <i class="bi bi-house-door"></i>
+                                <span class="nav-text">首页</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if request.path == url_for('data_management') %}active{% endif %}">
+                            <a class="nav-link" href="{{ url_for('data_management') }}">
+                                <i class="bi bi-database"></i>
+                                <span class="nav-text">数据管理</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if request.path == url_for('model_training') %}active{% endif %}">
+                            <a class="nav-link" href="{{ url_for('model_training') }}">
+                                <i class="bi bi-cpu"></i>
+                                <span class="nav-text">模型训练</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if request.path == url_for('prediction') %}active{% endif %}">
+                            <a class="nav-link" href="{{ url_for('prediction') }}">
+                                <i class="bi bi-graph-up"></i>
+                                <span class="nav-text">预测分析</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if request.path == url_for('report') %}active{% endif %}">
+                            <a class="nav-link" href="{{ url_for('report') }}">
+                                <i class="bi bi-file-earmark-text"></i>
+                                <span class="nav-text">报告生成</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {% if request.path == url_for('settings') %}active{% endif %}">
+                            <a class="nav-link" href="{{ url_for('settings') }}">
+                                <i class="bi bi-gear"></i>
+                                <span class="nav-text">系统设置</span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="navbar-right">
+                        <div class="theme-switcher">
+                            <button id="theme-toggle" class="btn-icon" aria-label="切换主题">
+                                <i class="bi bi-moon"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="user-dropdown">
+                            <button class="user-dropdown-toggle" aria-label="用户菜单" type="button">
+                                <div class="user-avatar">
+                                    <img src="{{ url_for('static', filename='img/avatar.png') }}" alt="用户头像">
+                                </div>
+                                <span class="d-none d-md-inline-block">{{ current_user.name if current_user.is_authenticated else '游客' }}</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                {% if current_user.is_authenticated %}
+                                <a class="dropdown-item" href="{{ url_for('user_profile') }}">
+                                    <i class="bi bi-person"></i> 个人资料
+                                </a>
+                                <a class="dropdown-item" href="{{ url_for('notifications') }}">
+                                    <i class="bi bi-bell"></i> 通知
+                                    <span class="badge badge-pill badge-danger">{{ notification_count }}</span>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ url_for('logout') }}">
+                                    <i class="bi bi-box-arrow-right"></i> 退出登录
+                                </a>
+                                {% else %}
+                                <a class="dropdown-item" href="{{ url_for('login') }}">
+                                    <i class="bi bi-box-arrow-in-right"></i> 登录
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- 移动端侧边菜单 -->
+    <div class="mobile-sidebar">
+        <div class="mobile-sidebar-header">
+            <div class="logo">
+                <svg width="30" height="30" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0zm0 36c-8.837 0-16-7.163-16-16S11.163 4 20 4s16 7.163 16 16-7.163 16-16 16z" fill="#2c7be5"/>
+                    <path d="M28 14a2 2 0 012 2v12a2 2 0 01-2 2H12a2 2 0 01-2-2V16a2 2 0 012-2h4v-4h8v4h4z" fill="#2c7be5"/>
+                    <path d="M20 18a4 4 0 100 8 4 4 0 000-8z" fill="#ffffff"/>
+                </svg>
+                <span>电厂污染物预测</span>
+            </div>
+            <button class="mobile-menu-close" aria-label="关闭菜单">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="mobile-sidebar-content">
+            <ul class="mobile-nav">
+                <li class="mobile-nav-item {% if request.path == url_for('index') %}active{% endif %}">
+                    <a href="{{ url_for('index') }}">
+                        <i class="bi bi-house-door"></i>
+                        <span>首页</span>
+                    </a>
+                </li>
+                <li class="mobile-nav-item {% if request.path == url_for('data_management') %}active{% endif %}">
+                    <a href="{{ url_for('data_management') }}">
+                        <i class="bi bi-database"></i>
+                        <span>数据管理</span>
+                    </a>
+                </li>
+                <li class="mobile-nav-item {% if request.path == url_for('model_training') %}active{% endif %}">
+                    <a href="{{ url_for('model_training') }}">
+                        <i class="bi bi-cpu"></i>
+                        <span>模型训练</span>
+                    </a>
+                </li>
+                <li class="mobile-nav-item {% if request.path == url_for('prediction') %}active{% endif %}">
+                    <a href="{{ url_for('prediction') }}">
+                        <i class="bi bi-graph-up"></i>
+                        <span>预测分析</span>
+                    </a>
+                </li>
+                <li class="mobile-nav-item {% if request.path == url_for('report') %}active{% endif %}">
+                    <a href="{{ url_for('report') }}">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>报告生成</span>
+                    </a>
+                </li>
+                <li class="mobile-nav-item {% if request.path == url_for('settings') %}active{% endif %}">
+                    <a href="{{ url_for('settings') }}">
+                        <i class="bi bi-gear"></i>
+                        <span>系统设置</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="mobile-nav-footer">
+                {% if current_user.is_authenticated %}
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <img src="{{ url_for('static', filename='img/avatar.png') }}" alt="用户头像">
+                    </div>
+                    <div class="user-details">
+                        <h5>{{ current_user.name }}</h5>
+                        <p>{{ current_user.role }}</p>
+                    </div>
+                </div>
+                <div class="mobile-nav-actions">
+                    <a href="{{ url_for('user_profile') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-person"></i> 个人资料
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-box-arrow-right"></i> 退出
+                    </a>
+                </div>
+                {% else %}
+                <div class="mobile-nav-actions">
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-block">
+                        <i class="bi bi-box-arrow-in-right"></i> 登录
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主要内容容器 -->
+    <div class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="关闭">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html> 

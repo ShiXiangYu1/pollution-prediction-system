@@ -1,0 +1,53 @@
+# Python缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# 日志文件
+*.log
+logs/*.log
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+*.swo
+.DS_Store
+
+# 环境配置文件
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# 编辑器配置文件
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# 构建目录
+build/
+dist/
+*.egg-info/
+
+# 数据库文件
+*.sqlite
+*.sqlite3
+
+# 临时目录
+data/temp/
+data/uploads/
+
+# 测试结果
+测试结果/功能测试/*.png
+测试结果/性能测试/*.png
+测试结果/用户体验测试/*.png
+
+# 系统特定文件
+.DS_Store
+Thumbs.db 

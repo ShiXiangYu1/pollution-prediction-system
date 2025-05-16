@@ -1,0 +1,109 @@
+# 删除版本信息并添加项目名称
+name: pollution-prediction-system
+
+services:
+  # 主应用服务
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pollution_prediction_app
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./models:/app/models
+      - ./api.py:/app/api.py
+      - ./templates:/app/templates
+      - ./static:/app/static
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/pollution_prediction
+      - REDIS_URL=redis://redis:6379/0
+      - USE_MOCK_TORCH=false
+      - USE_MOCK_JINJA2=false
+      - USE_MOCK_MODE=false
+      - ENABLE_MOCK_TEMPLATES=false
+      - SKIP_ML_MODELS=false
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app_network
+
+  # 数据库服务
+  db:
+    image: postgres:14-alpine
+    container_name: pollution_prediction_db
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=pollution_prediction
+    networks:
+      - app_network
+
+  # Redis缓存服务
+  redis:
+    image: redis:6-alpine
+    container_name: pollution_prediction_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - app_network
+
+  # Prometheus监控服务
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: pollution_prediction_prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - app_network
+
+  # Grafana监控界面服务
+  grafana:
+    image: grafana/grafana:latest
+    container_name: pollution_prediction_grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge 

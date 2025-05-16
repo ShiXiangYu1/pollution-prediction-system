@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- 欢迎卡片 -->
+        <div class="card mb-4">
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    <div class="col-md-7 p-4">
+                        <h2 class="mb-3">电厂污染物排放预测与发电数据中心智慧看板</h2>
+                        <p class="lead">使用先进的深度学习技术，实时监控和预测电厂污染物排放情况，助力环保减排。</p>
+                        <p class="mb-4">本系统集成了污染物排放预测、自然语言查询和语音识别等功能，为电厂管理提供全方位智能支持。</p>
+                        <a href="/dashboard" class="btn btn-primary me-2">
+                            <i class="fas fa-chart-line me-1"></i> 查看数据看板
+                        </a>
+                        <a href="/prediction" class="btn btn-secondary">
+                            <i class="fas fa-chart-bar me-1"></i> 排放预测
+                        </a>
+                    </div>
+                    <div class="col-md-5 d-flex align-items-center justify-content-center bg-light p-4">
+                        <div class="wave-container">
+                            <div class="wave" style="top: 40%"></div>
+                            <div class="progress-value">60%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统功能卡片 -->
+        <h3 class="mb-3">系统功能</h3>
+        <div class="row">
+            <!-- 数据看板 -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-chart-line fa-2x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">数据看板</h5>
+                        <p class="card-text">实时监控多个指标，直观展示污染物排放数据和趋势分析。</p>
+                        <a href="/dashboard" class="btn btn-outline-primary btn-sm">查看详情</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 排放预测 -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-chart-bar fa-2x text-secondary"></i>
+                        </div>
+                        <h5 class="card-title">排放预测</h5>
+                        <p class="card-text">基于深度学习模型，预测未来排放趋势，及早发现潜在问题。</p>
+                        <a href="/prediction" class="btn btn-outline-secondary btn-sm">查看详情</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 自然语言查询 -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-comment-alt fa-2x text-info"></i>
+                        </div>
+                        <h5 class="card-title">自然语言查询</h5>
+                        <p class="card-text">使用自然语言描述需求，系统自动转换为SQL查询并执行。</p>
+                        <a href="/nl2sql" class="btn btn-outline-info btn-sm">查看详情</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 语音识别 -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-microphone fa-2x text-warning"></i>
+                        </div>
+                        <h5 class="card-title">语音识别</h5>
+                        <p class="card-text">通过语音输入快速查询，提高操作效率和用户体验。</p>
+                        <a href="/speech" class="btn btn-outline-warning btn-sm">查看详情</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实时数据概览 -->
+        <h3 class="mb-3 mt-4">实时数据概览</h3>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="dashboard-stat">
+                    <i class="fas fa-smog dashboard-stat-icon"></i>
+                    <div class="dashboard-stat-number" id="so2-avg">--</div>
+                    <div class="dashboard-stat-title">SO<sub>2</sub> 平均排放浓度 (mg/m³)</div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="dashboard-stat">
+                    <i class="fas fa-wind dashboard-stat-icon"></i>
+                    <div class="dashboard-stat-number" id="nox-avg">--</div>
+                    <div class="dashboard-stat-title">NOx 平均排放浓度 (mg/m³)</div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="dashboard-stat">
+                    <i class="fas fa-cloud dashboard-stat-icon"></i>
+                    <div class="dashboard-stat-number" id="dust-avg">--</div>
+                    <div class="dashboard-stat-title">烟尘平均排放浓度 (mg/m³)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 状态概览 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">机组排放状态</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>机组</th>
+                                <th>SO<sub>2</sub></th>
+                                <th>NOx</th>
+                                <th>烟尘</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody id="emission-status-tbody">
+                            <tr>
+                                <td colspan="5" class="text-center">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 加载实时数据概览
+    loadEmissionsData();
+});
+
+function loadEmissionsData() {
+    axios.get('/api/emissions')
+        .then(function(response) {
+            const data = response.data.data;
+            updateEmissionsStats(data);
+            updateEmissionsStatusTable(data);
+        })
+        .catch(function(error) {
+            handleApiError(error);
+        });
+}
+
+function updateEmissionsStats(data) {
+    // 计算平均值
+    let so2Sum = 0, noxSum = 0, dustSum = 0;
+    data.forEach(item => {
+        so2Sum += item.SO2;
+        noxSum += item.NOx;
+        dustSum += item.dust;
+    });
+    
+    const avgSO2 = (so2Sum / data.length).toFixed(2);
+    const avgNOx = (noxSum / data.length).toFixed(2);
+    const avgDust = (dustSum / data.length).toFixed(2);
+    
+    // 更新显示
+    document.getElementById('so2-avg').textContent = avgSO2;
+    document.getElementById('nox-avg').textContent = avgNOx;
+    document.getElementById('dust-avg').textContent = avgDust;
+}
+
+function updateEmissionsStatusTable(data) {
+    // 按照机组ID分组最新数据
+    const groupedByUnit = {};
+    data.forEach(item => {
+        if (!groupedByUnit[item.unit_id] || new Date(item.timestamp) > new Date(groupedByUnit[item.unit_id].timestamp)) {
+            groupedByUnit[item.unit_id] = item;
+        }
+    });
+    
+    // 更新表格
+    const tbody = document.getElementById('emission-status-tbody');
+    tbody.innerHTML = '';
+    
+    Object.keys(groupedByUnit).forEach(unitId => {
+        const item = groupedByUnit[unitId];
+        const so2Status = getStatusClass(item.SO2, 35);
+        const noxStatus = getStatusClass(item.NOx, 50);
+        const dustStatus = getStatusClass(item.dust, 10);
+        
+        // 综合状态
+        let overallStatus = 'normal';
+        if (so2Status === 'danger' || noxStatus === 'danger' || dustStatus === 'danger') {
+            overallStatus = 'danger';
+        } else if (so2Status === 'warning' || noxStatus === 'warning' || dustStatus === 'warning') {
+            overallStatus = 'warning';
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>机组 ${item.unit_id}</td>
+            <td>${item.SO2} mg/m³ <span class="status-indicator status-${so2Status}"></span></td>
+            <td>${item.NOx} mg/m³ <span class="status-indicator status-${noxStatus}"></span></td>
+            <td>${item.dust} mg/m³ <span class="status-indicator status-${dustStatus}"></span></td>
+            <td>
+                <span class="badge ${getStatusBadgeClass(overallStatus)}">
+                    ${getStatusText(overallStatus)}
+                </span>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function getStatusClass(value, threshold) {
+    if (value > threshold * 1.2) return 'danger';
+    if (value > threshold) return 'warning';
+    return 'normal';
+}
+
+function getStatusBadgeClass(status) {
+    switch(status) {
+        case 'danger': return 'bg-danger';
+        case 'warning': return 'bg-warning text-dark';
+        default: return 'bg-success';
+    }
+}
+
+function getStatusText(status) {
+    switch(status) {
+        case 'danger': return '超标';
+        case 'warning': return '临界';
+        default: return '正常';
+    }
+}
+</script>
+{% endblock %} 

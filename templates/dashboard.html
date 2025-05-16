@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}数据看板 - 电厂污染物排放预测系统{% endblock %}
+
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <h1 class="text-center mb-4">数据看板</h1>
+        <div class="card">
+            <div class="card-body">
+                <h2>排放数据看板</h2>
+                <p>这里将展示排放数据的统计信息和可视化图表</p>
+                <div class="alert alert-info">
+                    系统正在加载数据...
+                </div>
+                <a href="/" class="btn btn-primary">返回首页</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('数据看板页面加载完成');
+        // 这里添加数据看板特定的JavaScript代码
+    });
+</script>
+{% endblock %} 

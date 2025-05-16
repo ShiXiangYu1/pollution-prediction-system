@@ -1,0 +1,10 @@
+[
+  {
+    "instruction": "根据以下数据库模式，将自然语言查询转换为SQL查询。\n\n数据库模式:\n\n    地区表(TS_AREA): 地区编号(AREA_CODE), 地区名称(AREA_NAME), 父地区编号(PARENT_CODE)\n    电厂表(TB_FACTORY): 电厂编号(FAC_ID), 地区编号(AREA_CODE), 电厂名称(FAC_NAME), 归属集团(GROUP_ID), 地址(FAC_ADDR), 电厂坐标(X_MAP, Y_MAP), 电厂简称(FAC_ALIAS), 电厂是否启用(ACTIVE_FLAG)\n    机组表(TB_STEAMER): 机组编号(STEAMER_ID), 机组名称(STEAMER_NAME), 机组所属电厂编号(FAC_ID), 机组负荷(RATING_FH), 机组是否启用(ACTIVE_FLAG), 机组类型(STEAMER_TYPE)\n    \n\n自然语言查询: 当前哪些机组实时污染物排放超标？",
+    "response": "SQL查询:\nSELECT f.FAC_NAME, s.STEAMER_NAME FROM TB_FACTORY f JOIN TB_STEAMER s ON f.FAC_ID = s.FAC_ID WHERE s.ACTIVE_FLAG = '是'"
+  },
+  {
+    "instruction": "根据以下数据库模式，将自然语言查询转换为SQL查询。\n\n数据库模式:\n\n    地区表(TS_AREA): 地区编号(AREA_CODE), 地区名称(AREA_NAME), 父地区编号(PARENT_CODE)\n    电厂表(TB_FACTORY): 电厂编号(FAC_ID), 地区编号(AREA_CODE), 电厂名称(FAC_NAME), 归属集团(GROUP_ID), 地址(FAC_ADDR), 电厂坐标(X_MAP, Y_MAP), 电厂简称(FAC_ALIAS), 电厂是否启用(ACTIVE_FLAG)\n    机组表(TB_STEAMER): 机组编号(STEAMER_ID), 机组名称(STEAMER_NAME), 机组所属电厂编号(FAC_ID), 机组负荷(RATING_FH), 机组是否启用(ACTIVE_FLAG), 机组类型(STEAMER_TYPE)\n    \n\n自然语言查询: 南京地区的电厂有哪些？",
+    "response": "SQL查询:\nSELECT f.FAC_NAME FROM TB_FACTORY f JOIN TS_AREA a ON f.AREA_CODE = a.AREA_CODE WHERE a.AREA_NAME = '南京'"
+  }
+]

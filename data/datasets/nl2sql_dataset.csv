@@ -1,0 +1,235 @@
+natural_language,sql_query,db_schema
+当前哪些机组实时污染物排放超标？,"
+                SELECT f.FAC_NAME as 电厂名称, s.STEAMER_NAME as 机组名称, 
+                       d1.RECTIME as 时间, d1.VENT_SO2_CHK as SO2排放浓度,
+                       d2.VENT_NOX_CHK as NOx排放浓度,
+                       d3.VENT_SOOT_CHK as 烟尘排放浓度,
+                       CASE 
+                           WHEN s.STEAMER_TYPE = '燃煤机' THEN 
+                               CASE 
+                                   WHEN d1.VENT_SO2_CHK > 35 OR d2.VENT_NOX_CHK > 50 OR d3.VENT_SOOT_CHK > 5 THEN '超标'
+                                   ELSE '正常'
+                               END
+                           WHEN s.STEAMER_TYPE = '燃气机' THEN 
+                               CASE 
+                                   WHEN d1.VENT_SO2_CHK > 35 OR d2.VENT_NOX_CHK > 50 OR d3.VENT_SOOT_CHK > 5 THEN '超标'
+                                   ELSE '正常'
+                               END
+                           ELSE '未知'
+                       END as 排放状态
+                FROM TB_FACTORY f
+                JOIN TB_STEAMER s ON f.FAC_ID = s.FAC_ID
+                JOIN td_dtl_2025 d1 ON s.STEAMER_ID = d1.STEAMER_ID
+                JOIN td_dtx_2025 d2 ON s.STEAMER_ID = d2.STEAMER_ID AND d1.RECTIME = d2.RECTIME
+                JOIN td_dcc_2025 d3 ON s.STEAMER_ID = d3.STEAMER_ID AND d1.RECTIME = d3.RECTIME
+                WHERE d1.RECTIME >= DATEADD(HOUR, -1, GETDATE())
+                AND (
+                    (s.STEAMER_TYPE = '燃煤机' AND (d1.VENT_SO2_CHK > 35 OR d2.VENT_NOX_CHK > 50 OR d3.VENT_SOOT_CHK > 5))
+                    OR
+                    (s.STEAMER_TYPE = '燃气机' AND (d1.VENT_SO2_CHK > 35 OR d2.VENT_NOX_CHK > 50 OR d3.VENT_SOOT_CHK > 5))
+                )
+                ORDER BY d1.RECTIME DESC;
+                ","
+        地区表(TS_AREA): 地区编号(AREA_CODE), 地区名称(AREA_NAME), 父地区编号(PARENT_CODE)
+        电厂表(TB_FACTORY): 电厂编号(FAC_ID), 地区编号(AREA_CODE), 电厂名称(FAC_NAME), 归属集团(GROUP_ID), 地址(FAC_ADDR), 电厂坐标(X_MAP, Y_MAP), 电厂简称(FAC_ALIAS), 电厂是否启用(ACTIVE_FLAG)
+        机组表(TB_STEAMER): 机组编号(STEAMER_ID), 机组名称(STEAMER_NAME), 机组所属电厂编号(FAC_ID), 机组负荷(RATING_FH), 机组是否启用(ACTIVE_FLAG), 机组类型(STEAMER_TYPE)
+        电厂测点信息表(tb_rtu_channel): 测点所属电厂编号(FAC_ID), 测点编号(CHANNEL_NUM), 测点名称(CHANNEL_NAME), 测点工程值KKS(KKS_WORK), 测点是否启用(ACTIVE_FLAG)
+        测点采集数据表(td_hisdata): 工程值KKS(KKS_WORK), 时间(RECTIME), 采集值(VALUE)
+        二氧化硫小时数据表(td_dtl_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), SO2二氧化硫排放浓度(VENT_SO2_CHK), SO2二氧化硫排放量(VENT_SO2_T), 脱硫效率(FGD_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), SO2二氧化硫超标倍数(OVER_MULTIPLE), SO2二氧化硫超标时长(TIME_2TO30, TIME_30TO50)
+        氮氧化物小时数据表(td_dtx_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), NOx氮氧化物排放浓度(VENT_NOX_CHK), NOx氮氧化物排放量(VENT_NOX_T), 脱硝效率(SCR_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), NOx氮氧化物超标倍数(OVER_MULTIPLE), NOx氮氧化物超标时长(TIME_2TO30, TIME_30TO50)
+        烟尘小时数据表(td_dcc_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), 烟尘排放浓度(VENT_SOOT_CHK), 烟尘排放量(VENT_SOOT_T), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), 烟尘超标倍数(OVER_MULTIPLE), 烟尘超标时长(TIME_2TO30, TIME_30TO50)
+        "
+过去24小时有哪些机组发生污染物小时浓度超标？,"
+                SELECT f.FAC_NAME as 电厂名称, s.STEAMER_NAME as 机组名称, 
+                       d1.RECTIME as 时间, d1.VENT_SO2_CHK as SO2排放浓度,
+                       d2.VENT_NOX_CHK as NOx排放浓度,
+                       d3.VENT_SOOT_CHK as 烟尘排放浓度,
+                       CASE 
+                           WHEN s.STEAMER_TYPE = '燃煤机' THEN 
+                               CASE 
+                                   WHEN d1.VENT_SO2_CHK > 35 OR d2.VENT_NOX_CHK > 50 OR d3.VENT_SOOT_CHK > 5 THEN '超标'
+                                   ELSE '正常'
+                               END
+                           WHEN s.STEAMER_TYPE = '燃气机' THEN 
+                               CASE 
+                                   WHEN d1.VENT_SO2_CHK > 35 OR d2.VENT_NOX_CHK > 50 OR d3.VENT_SOOT_CHK > 5 THEN '超标'
+                                   ELSE '正常'
+                               END
+                           ELSE '未知'
+                       END as 排放状态,
+                       d1.TIME_2TO30 + d1.TIME_30TO50 as SO2超标时长,
+                       d2.TIME_2TO30 + d2.TIME_30TO50 as NOx超标时长,
+                       d3.TIME_2TO30 + d3.TIME_30TO50 as 烟尘超标时长
+                FROM TB_FACTORY f
+                JOIN TB_STEAMER s ON f.FAC_ID = s.FAC_ID
+                JOIN td_dtl_2025 d1 ON s.STEAMER_ID = d1.STEAMER_ID
+                JOIN td_dtx_2025 d2 ON s.STEAMER_ID = d2.STEAMER_ID AND d1.RECTIME = d2.RECTIME
+                JOIN td_dcc_2025 d3 ON s.STEAMER_ID = d3.STEAMER_ID AND d1.RECTIME = d3.RECTIME
+                WHERE d1.RECTIME >= DATEADD(HOUR, -24, GETDATE())
+                AND (
+                    (s.STEAMER_TYPE = '燃煤机' AND (d1.VENT_SO2_CHK > 35 OR d2.VENT_NOX_CHK > 50 OR d3.VENT_SOOT_CHK > 5))
+                    OR
+                    (s.STEAMER_TYPE = '燃气机' AND (d1.VENT_SO2_CHK > 35 OR d2.VENT_NOX_CHK > 50 OR d3.VENT_SOOT_CHK > 5))
+                )
+                ORDER BY d1.RECTIME DESC;
+                ","
+        地区表(TS_AREA): 地区编号(AREA_CODE), 地区名称(AREA_NAME), 父地区编号(PARENT_CODE)
+        电厂表(TB_FACTORY): 电厂编号(FAC_ID), 地区编号(AREA_CODE), 电厂名称(FAC_NAME), 归属集团(GROUP_ID), 地址(FAC_ADDR), 电厂坐标(X_MAP, Y_MAP), 电厂简称(FAC_ALIAS), 电厂是否启用(ACTIVE_FLAG)
+        机组表(TB_STEAMER): 机组编号(STEAMER_ID), 机组名称(STEAMER_NAME), 机组所属电厂编号(FAC_ID), 机组负荷(RATING_FH), 机组是否启用(ACTIVE_FLAG), 机组类型(STEAMER_TYPE)
+        电厂测点信息表(tb_rtu_channel): 测点所属电厂编号(FAC_ID), 测点编号(CHANNEL_NUM), 测点名称(CHANNEL_NAME), 测点工程值KKS(KKS_WORK), 测点是否启用(ACTIVE_FLAG)
+        测点采集数据表(td_hisdata): 工程值KKS(KKS_WORK), 时间(RECTIME), 采集值(VALUE)
+        二氧化硫小时数据表(td_dtl_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), SO2二氧化硫排放浓度(VENT_SO2_CHK), SO2二氧化硫排放量(VENT_SO2_T), 脱硫效率(FGD_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), SO2二氧化硫超标倍数(OVER_MULTIPLE), SO2二氧化硫超标时长(TIME_2TO30, TIME_30TO50)
+        氮氧化物小时数据表(td_dtx_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), NOx氮氧化物排放浓度(VENT_NOX_CHK), NOx氮氧化物排放量(VENT_NOX_T), 脱硝效率(SCR_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), NOx氮氧化物超标倍数(OVER_MULTIPLE), NOx氮氧化物超标时长(TIME_2TO30, TIME_30TO50)
+        烟尘小时数据表(td_dcc_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), 烟尘排放浓度(VENT_SOOT_CHK), 烟尘排放量(VENT_SOOT_T), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), 烟尘超标倍数(OVER_MULTIPLE), 烟尘超标时长(TIME_2TO30, TIME_30TO50)
+        "
+过去24小时单位发电量对应的污染物排放量排名最低的三台机组是哪三个？,"
+                WITH EmissionPerKWH AS (
+                    SELECT 
+                        f.FAC_NAME as 电厂名称, 
+                        s.STEAMER_NAME as 机组名称,
+                        SUM(d1.VENT_SO2_T) as SO2总排放量,
+                        SUM(d2.VENT_NOX_T) as NOx总排放量,
+                        SUM(d3.VENT_SOOT_T) as 烟尘总排放量,
+                        SUM(d1.FD_KWH) as 总发电量,
+                        CASE 
+                            WHEN SUM(d1.FD_KWH) > 0 THEN SUM(d1.VENT_SO2_T) / SUM(d1.FD_KWH)
+                            ELSE 0 
+                        END as 单位发电量SO2排放,
+                        CASE 
+                            WHEN SUM(d1.FD_KWH) > 0 THEN SUM(d2.VENT_NOX_T) / SUM(d1.FD_KWH)
+                            ELSE 0 
+                        END as 单位发电量NOx排放,
+                        CASE 
+                            WHEN SUM(d1.FD_KWH) > 0 THEN SUM(d3.VENT_SOOT_T) / SUM(d1.FD_KWH)
+                            ELSE 0 
+                        END as 单位发电量烟尘排放
+                    FROM TB_FACTORY f
+                    JOIN TB_STEAMER s ON f.FAC_ID = s.FAC_ID
+                    JOIN td_dtl_2025 d1 ON s.STEAMER_ID = d1.STEAMER_ID
+                    JOIN td_dtx_2025 d2 ON s.STEAMER_ID = d2.STEAMER_ID AND d1.RECTIME = d2.RECTIME
+                    JOIN td_dcc_2025 d3 ON s.STEAMER_ID = d3.STEAMER_ID AND d1.RECTIME = d3.RECTIME
+                    WHERE d1.RECTIME >= DATEADD(HOUR, -24, GETDATE())
+                    GROUP BY f.FAC_NAME, s.STEAMER_NAME
+                )
+                
+                SELECT TOP 3 电厂名称, 机组名称, 单位发电量SO2排放, 单位发电量NOx排放, 单位发电量烟尘排放
+                FROM EmissionPerKWH
+                WHERE 总发电量 > 0
+                ORDER BY (单位发电量SO2排放 + 单位发电量NOx排放 + 单位发电量烟尘排放) ASC;
+                ","
+        地区表(TS_AREA): 地区编号(AREA_CODE), 地区名称(AREA_NAME), 父地区编号(PARENT_CODE)
+        电厂表(TB_FACTORY): 电厂编号(FAC_ID), 地区编号(AREA_CODE), 电厂名称(FAC_NAME), 归属集团(GROUP_ID), 地址(FAC_ADDR), 电厂坐标(X_MAP, Y_MAP), 电厂简称(FAC_ALIAS), 电厂是否启用(ACTIVE_FLAG)
+        机组表(TB_STEAMER): 机组编号(STEAMER_ID), 机组名称(STEAMER_NAME), 机组所属电厂编号(FAC_ID), 机组负荷(RATING_FH), 机组是否启用(ACTIVE_FLAG), 机组类型(STEAMER_TYPE)
+        电厂测点信息表(tb_rtu_channel): 测点所属电厂编号(FAC_ID), 测点编号(CHANNEL_NUM), 测点名称(CHANNEL_NAME), 测点工程值KKS(KKS_WORK), 测点是否启用(ACTIVE_FLAG)
+        测点采集数据表(td_hisdata): 工程值KKS(KKS_WORK), 时间(RECTIME), 采集值(VALUE)
+        二氧化硫小时数据表(td_dtl_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), SO2二氧化硫排放浓度(VENT_SO2_CHK), SO2二氧化硫排放量(VENT_SO2_T), 脱硫效率(FGD_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), SO2二氧化硫超标倍数(OVER_MULTIPLE), SO2二氧化硫超标时长(TIME_2TO30, TIME_30TO50)
+        氮氧化物小时数据表(td_dtx_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), NOx氮氧化物排放浓度(VENT_NOX_CHK), NOx氮氧化物排放量(VENT_NOX_T), 脱硝效率(SCR_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), NOx氮氧化物超标倍数(OVER_MULTIPLE), NOx氮氧化物超标时长(TIME_2TO30, TIME_30TO50)
+        烟尘小时数据表(td_dcc_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), 烟尘排放浓度(VENT_SOOT_CHK), 烟尘排放量(VENT_SOOT_T), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), 烟尘超标倍数(OVER_MULTIPLE), 烟尘超标时长(TIME_2TO30, TIME_30TO50)
+        "
+分析江苏省燃煤机组2024年污染物排放趋势,"
+                SELECT 
+                    DATEPART(MONTH, d1.RECTIME) as 月份,
+                    AVG(d1.VENT_SO2_CHK) as 平均SO2排放浓度,
+                    AVG(d2.VENT_NOX_CHK) as 平均NOx排放浓度,
+                    AVG(d3.VENT_SOOT_CHK) as 平均烟尘排放浓度
+                FROM TB_FACTORY f
+                JOIN TS_AREA a ON f.AREA_CODE = a.AREA_CODE
+                JOIN TB_STEAMER s ON f.FAC_ID = s.FAC_ID
+                JOIN td_dtl_2025 d1 ON s.STEAMER_ID = d1.STEAMER_ID
+                JOIN td_dtx_2025 d2 ON s.STEAMER_ID = d2.STEAMER_ID AND d1.RECTIME = d2.RECTIME
+                JOIN td_dcc_2025 d3 ON s.STEAMER_ID = d3.STEAMER_ID AND d1.RECTIME = d3.RECTIME
+                WHERE a.PARENT_CODE = '01' -- 江苏省
+                AND s.STEAMER_TYPE = '燃煤机'
+                AND YEAR(d1.RECTIME) = 2024
+                GROUP BY DATEPART(MONTH, d1.RECTIME)
+                ORDER BY 月份;
+                ","
+        地区表(TS_AREA): 地区编号(AREA_CODE), 地区名称(AREA_NAME), 父地区编号(PARENT_CODE)
+        电厂表(TB_FACTORY): 电厂编号(FAC_ID), 地区编号(AREA_CODE), 电厂名称(FAC_NAME), 归属集团(GROUP_ID), 地址(FAC_ADDR), 电厂坐标(X_MAP, Y_MAP), 电厂简称(FAC_ALIAS), 电厂是否启用(ACTIVE_FLAG)
+        机组表(TB_STEAMER): 机组编号(STEAMER_ID), 机组名称(STEAMER_NAME), 机组所属电厂编号(FAC_ID), 机组负荷(RATING_FH), 机组是否启用(ACTIVE_FLAG), 机组类型(STEAMER_TYPE)
+        电厂测点信息表(tb_rtu_channel): 测点所属电厂编号(FAC_ID), 测点编号(CHANNEL_NUM), 测点名称(CHANNEL_NAME), 测点工程值KKS(KKS_WORK), 测点是否启用(ACTIVE_FLAG)
+        测点采集数据表(td_hisdata): 工程值KKS(KKS_WORK), 时间(RECTIME), 采集值(VALUE)
+        二氧化硫小时数据表(td_dtl_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), SO2二氧化硫排放浓度(VENT_SO2_CHK), SO2二氧化硫排放量(VENT_SO2_T), 脱硫效率(FGD_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), SO2二氧化硫超标倍数(OVER_MULTIPLE), SO2二氧化硫超标时长(TIME_2TO30, TIME_30TO50)
+        氮氧化物小时数据表(td_dtx_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), NOx氮氧化物排放浓度(VENT_NOX_CHK), NOx氮氧化物排放量(VENT_NOX_T), 脱硝效率(SCR_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), NOx氮氧化物超标倍数(OVER_MULTIPLE), NOx氮氧化物超标时长(TIME_2TO30, TIME_30TO50)
+        烟尘小时数据表(td_dcc_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), 烟尘排放浓度(VENT_SOOT_CHK), 烟尘排放量(VENT_SOOT_T), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), 烟尘超标倍数(OVER_MULTIPLE), 烟尘超标时长(TIME_2TO30, TIME_30TO50)
+        "
+总结江苏省2024年12月发电情况,"
+                WITH GenerationSummary AS (
+                    SELECT 
+                        COUNT(DISTINCT f.FAC_ID) as 电厂总数,
+                        COUNT(DISTINCT CASE WHEN s.STEAMER_TYPE = '燃煤机' THEN s.STEAMER_ID END) as 煤机数量,
+                        COUNT(DISTINCT CASE WHEN s.STEAMER_TYPE = '燃气机' THEN s.STEAMER_ID END) as 气机数量,
+                        COUNT(DISTINCT CASE WHEN s.STEAMER_TYPE = '风电' THEN s.STEAMER_ID END) as 风电数量,
+                        AVG(d1.VENT_SO2_CHK) as 平均SO2排放浓度,
+                        AVG(d1.FGD_EFCY) as 平均脱硫效率,
+                        AVG(d2.VENT_NOX_CHK) as 平均NOx排放浓度,
+                        AVG(d2.SCR_EFCY) as 平均脱硝效率,
+                        AVG(d3.VENT_SOOT_CHK) as 平均烟尘排放浓度,
+                        AVG(s.RATING_FH) as 平均负荷
+                    FROM TB_FACTORY f
+                    JOIN TS_AREA a ON f.AREA_CODE = a.AREA_CODE
+                    JOIN TB_STEAMER s ON f.FAC_ID = s.FAC_ID
+                    LEFT JOIN td_dtl_2025 d1 ON s.STEAMER_ID = d1.STEAMER_ID AND YEAR(d1.RECTIME) = 2024 AND MONTH(d1.RECTIME) = 12
+                    LEFT JOIN td_dtx_2025 d2 ON s.STEAMER_ID = d2.STEAMER_ID AND YEAR(d2.RECTIME) = 2024 AND MONTH(d2.RECTIME) = 12
+                    LEFT JOIN td_dcc_2025 d3 ON s.STEAMER_ID = d3.STEAMER_ID AND YEAR(d3.RECTIME) = 2024 AND MONTH(d3.RECTIME) = 12
+                    WHERE a.PARENT_CODE = '01' -- 江苏省
+                )
+                
+                SELECT 
+                    电厂总数,
+                    煤机数量,
+                    气机数量,
+                    风电数量,
+                    平均SO2排放浓度,
+                    平均脱硫效率,
+                    平均NOx排放浓度,
+                    平均脱硝效率,
+                    平均烟尘排放浓度,
+                    平均负荷
+                FROM GenerationSummary;
+                ","
+        地区表(TS_AREA): 地区编号(AREA_CODE), 地区名称(AREA_NAME), 父地区编号(PARENT_CODE)
+        电厂表(TB_FACTORY): 电厂编号(FAC_ID), 地区编号(AREA_CODE), 电厂名称(FAC_NAME), 归属集团(GROUP_ID), 地址(FAC_ADDR), 电厂坐标(X_MAP, Y_MAP), 电厂简称(FAC_ALIAS), 电厂是否启用(ACTIVE_FLAG)
+        机组表(TB_STEAMER): 机组编号(STEAMER_ID), 机组名称(STEAMER_NAME), 机组所属电厂编号(FAC_ID), 机组负荷(RATING_FH), 机组是否启用(ACTIVE_FLAG), 机组类型(STEAMER_TYPE)
+        电厂测点信息表(tb_rtu_channel): 测点所属电厂编号(FAC_ID), 测点编号(CHANNEL_NUM), 测点名称(CHANNEL_NAME), 测点工程值KKS(KKS_WORK), 测点是否启用(ACTIVE_FLAG)
+        测点采集数据表(td_hisdata): 工程值KKS(KKS_WORK), 时间(RECTIME), 采集值(VALUE)
+        二氧化硫小时数据表(td_dtl_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), SO2二氧化硫排放浓度(VENT_SO2_CHK), SO2二氧化硫排放量(VENT_SO2_T), 脱硫效率(FGD_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), SO2二氧化硫超标倍数(OVER_MULTIPLE), SO2二氧化硫超标时长(TIME_2TO30, TIME_30TO50)
+        氮氧化物小时数据表(td_dtx_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), NOx氮氧化物排放浓度(VENT_NOX_CHK), NOx氮氧化物排放量(VENT_NOX_T), 脱硝效率(SCR_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), NOx氮氧化物超标倍数(OVER_MULTIPLE), NOx氮氧化物超标时长(TIME_2TO30, TIME_30TO50)
+        烟尘小时数据表(td_dcc_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), 烟尘排放浓度(VENT_SOOT_CHK), 烟尘排放量(VENT_SOOT_T), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), 烟尘超标倍数(OVER_MULTIPLE), 烟尘超标时长(TIME_2TO30, TIME_30TO50)
+        "
+盐城2024年11月燃煤、燃气、风电、光电负荷趋势,"
+                WITH DailyLoad AS (
+                    SELECT 
+                        CONVERT(DATE, d1.RECTIME) as 日期,
+                        s.STEAMER_TYPE as 机组类型,
+                        AVG(s.RATING_FH) as 平均负荷
+                    FROM TB_FACTORY f
+                    JOIN TS_AREA a ON f.AREA_CODE = a.AREA_CODE
+                    JOIN TB_STEAMER s ON f.FAC_ID = s.FAC_ID
+                    JOIN td_dtl_2025 d1 ON s.STEAMER_ID = d1.STEAMER_ID
+                    WHERE a.AREA_NAME = '盐城'
+                    AND YEAR(d1.RECTIME) = 2024
+                    AND MONTH(d1.RECTIME) = 11
+                    AND s.STEAMER_TYPE IN ('燃煤机', '燃气机', '风电', '光电')
+                    GROUP BY CONVERT(DATE, d1.RECTIME), s.STEAMER_TYPE
+                )
+                
+                SELECT 
+                    日期,
+                    MAX(CASE WHEN 机组类型 = '燃煤机' THEN 平均负荷 ELSE 0 END) as 燃煤机负荷,
+                    MAX(CASE WHEN 机组类型 = '燃气机' THEN 平均负荷 ELSE 0 END) as 燃气机负荷,
+                    MAX(CASE WHEN 机组类型 = '风电' THEN 平均负荷 ELSE 0 END) as 风电负荷,
+                    MAX(CASE WHEN 机组类型 = '光电' THEN 平均负荷 ELSE 0 END) as 光电负荷
+                FROM DailyLoad
+                GROUP BY 日期
+                ORDER BY 日期;
+                ","
+        地区表(TS_AREA): 地区编号(AREA_CODE), 地区名称(AREA_NAME), 父地区编号(PARENT_CODE)
+        电厂表(TB_FACTORY): 电厂编号(FAC_ID), 地区编号(AREA_CODE), 电厂名称(FAC_NAME), 归属集团(GROUP_ID), 地址(FAC_ADDR), 电厂坐标(X_MAP, Y_MAP), 电厂简称(FAC_ALIAS), 电厂是否启用(ACTIVE_FLAG)
+        机组表(TB_STEAMER): 机组编号(STEAMER_ID), 机组名称(STEAMER_NAME), 机组所属电厂编号(FAC_ID), 机组负荷(RATING_FH), 机组是否启用(ACTIVE_FLAG), 机组类型(STEAMER_TYPE)
+        电厂测点信息表(tb_rtu_channel): 测点所属电厂编号(FAC_ID), 测点编号(CHANNEL_NUM), 测点名称(CHANNEL_NAME), 测点工程值KKS(KKS_WORK), 测点是否启用(ACTIVE_FLAG)
+        测点采集数据表(td_hisdata): 工程值KKS(KKS_WORK), 时间(RECTIME), 采集值(VALUE)
+        二氧化硫小时数据表(td_dtl_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), SO2二氧化硫排放浓度(VENT_SO2_CHK), SO2二氧化硫排放量(VENT_SO2_T), 脱硫效率(FGD_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), SO2二氧化硫超标倍数(OVER_MULTIPLE), SO2二氧化硫超标时长(TIME_2TO30, TIME_30TO50)
+        氮氧化物小时数据表(td_dtx_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), NOx氮氧化物排放浓度(VENT_NOX_CHK), NOx氮氧化物排放量(VENT_NOX_T), 脱硝效率(SCR_EFCY), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), NOx氮氧化物超标倍数(OVER_MULTIPLE), NOx氮氧化物超标时长(TIME_2TO30, TIME_30TO50)
+        烟尘小时数据表(td_dcc_2025): 时间(RECTIME), 所属机组编号(STEAMER_ID), 烟尘排放浓度(VENT_SOOT_CHK), 烟尘排放量(VENT_SOOT_T), 发电量(FD_KWH), 考核时间(CHK_TIME), 停运时间(STOP_TIME), 停运原因(STOP_CAUSE), 烟尘超标倍数(OVER_MULTIPLE), 烟尘超标时长(TIME_2TO30, TIME_30TO50)
+        "

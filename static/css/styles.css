@@ -1,0 +1,338 @@
+/* 全局样式 */
+:root {
+    --primary-color: #2c6ab3;
+    --secondary-color: #57a773;
+    --tertiary-color: #76b0ec;
+    --warning-color: #e8a628;
+    --danger-color: #cc3363;
+    --light-color: #f5f7fb;
+    --dark-color: #313a46;
+    --gray-color: #6c757d;
+    --border-color: #e5e9f2;
+    --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: "Microsoft YaHei", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--dark-color);
+    background-color: #f0f3f7;
+    line-height: 1.5;
+    padding-top: 56px;
+}
+
+/* 导航栏 */
+.navbar {
+    background-color: white;
+    box-shadow: var(--box-shadow);
+    transition: all 0.3s ease;
+}
+
+.navbar-scrolled {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(5px);
+}
+
+.navbar-brand {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.nav-link {
+    color: var(--dark-color);
+    transition: var(--transition);
+}
+
+.nav-link:hover {
+    color: var(--primary-color);
+}
+
+.nav-link.active {
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* 卡片 */
+.card {
+    border-radius: 0.5rem;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-title {
+    margin-bottom: 0;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* 按钮 */
+.btn {
+    border-radius: 0.25rem;
+    padding: 0.375rem 1rem;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #2257a0;
+    border-color: #2257a0;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-secondary:hover {
+    background-color: #468d5f;
+    border-color: #468d5f;
+}
+
+.btn-info {
+    background-color: var(--tertiary-color);
+    border-color: var(--tertiary-color);
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #5a9ed6;
+    border-color: #5a9ed6;
+    color: white;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+/* 表单元素 */
+.form-control {
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(44, 106, 179, 0.25);
+}
+
+/* 仪表盘元素 */
+.dashboard-stat {
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-stat-icon {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    font-size: 2.5rem;
+    opacity: 0.1;
+    color: var(--primary-color);
+}
+
+.dashboard-stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-stat-title {
+    font-size: 0.9rem;
+    color: var(--gray-color);
+    margin-bottom: 0;
+}
+
+/* 数据表格 */
+.table {
+    color: var(--dark-color);
+}
+
+.table thead th {
+    font-weight: 600;
+    color: var(--gray-color);
+    border-top: none;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* 波浪进度器 */
+.wave-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto;
+    border: 3px solid var(--primary-color);
+}
+
+.wave {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: 0;
+    left: -50%;
+    border-radius: 40%;
+    background: var(--primary-color);
+    animation: wave 5s linear infinite;
+}
+
+@keyframes wave {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.progress-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* 图标和指示器样式 */
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-normal {
+    background-color: var(--secondary-color);
+}
+
+.status-warning {
+    background-color: var(--warning-color);
+}
+
+.status-danger {
+    background-color: var(--danger-color);
+}
+
+/* 浮动提示框样式 */
+.alert-floating {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    min-width: 280px;
+    max-width: 500px;
+    background-color: white;
+    border-left: 4px solid var(--primary-color);
+    color: var(--dark-color);
+}
+
+.alert-floating.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.alert-floating .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--gray-color);
+    opacity: 0.7;
+}
+
+.alert-floating .close-btn:hover {
+    opacity: 1;
+}
+
+.alert-floating.alert-success {
+    border-left-color: var(--secondary-color);
+}
+
+.alert-floating.alert-info {
+    border-left-color: var(--primary-color);
+}
+
+.alert-floating.alert-warning {
+    border-left-color: var(--warning-color);
+}
+
+.alert-floating.alert-danger {
+    border-left-color: var(--danger-color);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .dashboard-stat {
+        padding: 1rem;
+    }
+    
+    .dashboard-stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .dashboard-stat-icon {
+        font-size: 2rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .alert-floating {
+        left: 20px;
+        right: 20px;
+        max-width: unset;
+    }
+} 
