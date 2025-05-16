@@ -1,0 +1,71 @@
+name: 构建并发布Docker镜像
+
+# 触发条件：推送到main分支或手动触发
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 检出代码
+      - name: 检出代码
+        uses: actions/checkout@v3
+      
+      # 设置QEMU（用于多平台构建）
+      - name: 设置QEMU
+        uses: docker/setup-qemu-action@v2
+      
+      # 设置Docker Buildx
+      - name: 设置Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      # 登录到Docker Hub
+      - name: 登录到Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      # 从仓库名提取镜像名
+      - name: 提取镜像元数据
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/pollution-prediction
+          tags: |
+            type=semver,pattern={{version}}
+            type=ref,event=branch
+            type=sha,format=short
+            latest
+      
+      # 构建并推送Docker镜像
+      - name: 构建并推送镜像
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/pollution-prediction:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/pollution-prediction:buildcache,mode=max
+      
+      # 构建并推送docker-compose文件
+      - name: 构建整个系统（可选）
+        if: false  # 默认禁用，需要时可启用
+        run: |
+          docker-compose -p pollution-prediction-system build
+          docker tag pollution-prediction-system-app:latest ${{ secrets.DOCKERHUB_USERNAME }}/pollution-prediction-system-app:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/pollution-prediction-system-app:latest
+      
+      # 更新README中的部署信息
+      - name: 更新部署信息
+        run: |
+          echo "Docker镜像已更新: ${{ secrets.DOCKERHUB_USERNAME }}/pollution-prediction:latest"
+          echo "拉取命令: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/pollution-prediction:latest" 

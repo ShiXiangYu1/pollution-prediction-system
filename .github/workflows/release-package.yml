@@ -1,0 +1,86 @@
+name: 发布完整Docker镜像包
+
+# 当创建新的发布标签时触发
+on:
+  release:
+    types: [created]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 检出代码
+      - name: 检出代码
+        uses: actions/checkout@v3
+      
+      # 获取版本号
+      - name: 获取版本号
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        shell: bash
+      
+      # 登录到Docker Hub
+      - name: 登录到Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      # 修改docker-compose.yml文件以使用远程镜像
+      - name: 修改docker-compose.yml
+        run: |
+          sed -i 's/build:/image: ${{ secrets.DOCKERHUB_USERNAME }}\/pollution-prediction:${{ steps.get_version.outputs.VERSION || 'latest' }}/g' docker-compose.yml
+          sed -i '/context:/d' docker-compose.yml
+          sed -i '/dockerfile:/d' docker-compose.yml
+        shell: bash
+      
+      # 构建并推送主应用镜像
+      - name: 构建并推送主应用镜像
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/pollution-prediction:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/pollution-prediction:${{ steps.get_version.outputs.VERSION || 'v1.0' }}
+      
+      # 将修改后的docker-compose.yml添加到发布中
+      - name: 上传docker-compose.yml到发布
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./docker-compose.yml
+          asset_name: docker-compose.yml
+          asset_content_type: application/yaml
+      
+      # 创建打包文件
+      - name: 创建部署包
+        run: |
+          mkdir -p deploy-package
+          cp docker-compose.yml deploy-package/
+          cp .env.example deploy-package/.env
+          cp -r prometheus deploy-package/
+          echo "# 电厂污染物排放预测系统部署包" > deploy-package/README.md
+          echo "拉取命令: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/pollution-prediction:${{ steps.get_version.outputs.VERSION || 'latest' }}" >> deploy-package/README.md
+          echo "" >> deploy-package/README.md
+          echo "## 快速部署步骤" >> deploy-package/README.md
+          echo "1. 确保安装了Docker和Docker Compose" >> deploy-package/README.md
+          echo "2. 运行 \`docker-compose up -d\`" >> deploy-package/README.md
+          echo "3. 访问 http://localhost:8000" >> deploy-package/README.md
+          zip -r deploy-package.zip deploy-package
+      
+      # 上传部署包到发布
+      - name: 上传部署包到发布
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./deploy-package.zip
+          asset_name: deploy-package.zip
+          asset_content_type: application/zip 

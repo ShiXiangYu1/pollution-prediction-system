@@ -117,4 +117,61 @@
 
 ## 开源协议
 
-本项目采用 MIT 许可证。详情请参见 [LICENSE](LICENSE) 文件。 
+本项目采用 MIT 许可证。详情请参见 [LICENSE](LICENSE) 文件。
+
+## Docker镜像
+
+本项目提供了自动构建的Docker镜像，可以通过以下方式获取：
+
+```bash
+# 拉取最新版本
+docker pull ${DOCKERHUB_USERNAME}/pollution-prediction:latest
+
+# 或指定版本
+docker pull ${DOCKERHUB_USERNAME}/pollution-prediction:v1.0
+```
+
+### 自动构建状态
+
+[![构建并发布Docker镜像](https://github.com/ShiXiangYu1/pollution-prediction-system/actions/workflows/docker-build.yml/badge.svg)](https://github.com/ShiXiangYu1/pollution-prediction-system/actions/workflows/docker-build.yml)
+
+### 使用方法
+
+1. 配置`docker-compose.yml`使用预构建镜像：
+   ```yaml
+   services:
+     app:
+       image: ${DOCKERHUB_USERNAME}/pollution-prediction:latest
+       # 其他配置保持不变
+   ```
+
+2. 启动服务：
+   ```bash
+   docker-compose up -d
+   ```
+
+### 方天公司离线环境部署说明
+
+对于在方天公司离线环境（局域网）内的部署，请：
+
+1. 从公网环境拉取最新镜像：
+   ```bash
+   docker pull ${DOCKERHUB_USERNAME}/pollution-prediction:latest
+   ```
+
+2. 保存镜像为文件：
+   ```bash
+   docker save ${DOCKERHUB_USERNAME}/pollution-prediction:latest > pollution-prediction.tar
+   ```
+
+3. 将镜像文件和`docker-compose.yml`文件复制到离线环境
+
+4. 在离线环境中加载镜像：
+   ```bash
+   docker load < pollution-prediction.tar
+   ```
+
+5. 启动服务：
+   ```bash
+   docker-compose up -d
+   ``` 
